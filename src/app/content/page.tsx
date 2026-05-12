@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { db } from "@/db";
 import { maternalHealthPrograms, pregnancyDurationStats } from "@/db/schema";
 import { and, eq, lte, gte, sql } from "drizzle-orm";

@@ -48,6 +48,48 @@ export function cosineSim(a: number[], b: number[]): number {
 }
 
 /**
+ * 아기수첩 내용 위험 감지 (우울/학대의심)
+ */
+export async function analyzeJournalRisk(content: string): Promise<{
+  riskLevel: "정상" | "우울의심" | "학대의심";
+  alertType: "1336" | "112" | null;
+  triggers: string[];
+}> {
+  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "no-key") {
+    return { riskLevel: "정상", alertType: null, triggers: [] };
+  }
+
+  const prompt = `아래 육아일지 내용을 분석해 위험 신호를 감지하라.
+
+감지 기준:
+- "우울의심": 산모의 우울증, 자해·자살 충동, 극도의 절망감, "죽고싶다" 류 표현
+- "학대의심": 아동에 대한 폭력, 방치, 과도한 체벌, 아기를 해치고 싶다는 표현
+- "정상": 위 기준에 해당하지 않음
+
+[출력] JSON만:
+{"riskLevel":"정상|우울의심|학대의심","alertType":"1336|112|null","triggers":[]}
+
+alertType: 우울의심→"1336", 학대의심→"112", 정상→null
+
+[일지 내용]
+${content}`;
+
+  const result = await client().chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" },
+    temperature: 0.1,
+  });
+
+  const parsed = JSON.parse(result.choices[0].message.content || "{}");
+  return {
+    riskLevel: parsed.riskLevel ?? "정상",
+    alertType: parsed.alertType === "null" ? null : (parsed.alertType ?? null),
+    triggers: parsed.triggers ?? [],
+  };
+}
+
+/**
  * GPT-4o로 PHQ-9 산후우울증 스코어링
  * 텍스트(음성 transcript) → 9개 항목 점수 (0-3) + 위험 키워드 추출
  */

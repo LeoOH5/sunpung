@@ -1,6 +1,7 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { db } from "@/db";
-import { postpartumCenters, supportPolicies, voiceDiaries } from "@/db/schema";
+import { postpartumCenters, supportPolicies, babyJournals } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
 
 const DEMO_USER = {
@@ -22,10 +23,10 @@ export default async function Home() {
   const week = getPregnancyWeek(DEMO_USER.dueDate);
   const [centerCount] = await db.select({ c: sql<number>`count(*)` }).from(postpartumCenters);
   const [policyCount] = await db.select({ c: sql<number>`count(*)` }).from(supportPolicies);
-  const recentDiary = await db.select().from(voiceDiaries).orderBy(desc(voiceDiaries.recordedAt)).limit(1);
+  const [recentJournal] = await db.select({ id: babyJournals.id, title: babyJournals.title }).from(babyJournals).orderBy(desc(babyJournals.createdAt)).limit(1);
+  const [journalCount] = await db.select({ c: sql<number>`count(*)` }).from(babyJournals);
 
   const trimester = week <= 13 ? "초기" : week <= 27 ? "중기" : week <= 40 ? "후기" : "산후";
-  const totalScore = recentDiary[0]?.totalScore ?? null;
   const dDay = Math.max(0, Math.ceil((new Date(DEMO_USER.dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
   return (
@@ -70,15 +71,17 @@ export default async function Home() {
         <div className="grid grid-cols-2 gap-3">
           <Link href="/diary" className="card hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-2">
-              <div className="text-2xl">🎙️</div>
-              {totalScore !== null && (
-                <span className={`text-xs px-2 py-1 rounded-full ${totalScore < 5 ? "bg-green-100 text-green-700" : totalScore < 10 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700"}`}>
-                  PHQ {totalScore}
+              <div className="text-2xl">📒</div>
+              {(journalCount.c as number) > 0 && (
+                <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700">
+                  {journalCount.c}건
                 </span>
               )}
             </div>
-            <p className="font-semibold">오늘의 음성 일기</p>
-            <p className="text-xs text-gray-500 mt-1">1분만 녹음하면 PHQ-9 자동 측정</p>
+            <p className="font-semibold">아기수첩</p>
+            <p className="text-xs text-gray-500 mt-1">
+              {recentJournal ? recentJournal.title : "소중한 순간을 기록해요"}
+            </p>
           </Link>
 
           <Link href="/postpartum" className="card hover:shadow-md transition-shadow">

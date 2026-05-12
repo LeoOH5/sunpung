@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 const items = [
   { href: "/", label: "홈", icon: HomeIcon },
   { href: "/postpartum", label: "조리원", icon: HouseIcon },
-  { href: "/diary", label: "일기", icon: MicIcon },
+  { href: "/diary", label: "아기수첩", icon: BookIcon },
   { href: "/support", label: "지원금", icon: WalletIcon },
   { href: "/sos", label: "SOS", icon: ShieldIcon },
 ];
@@ -43,11 +43,11 @@ function HouseIcon() {
     </svg>
   );
 }
-function MicIcon() {
+function BookIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="9" y="3" width="6" height="12" rx="3" />
-      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
     </svg>
   );
 }

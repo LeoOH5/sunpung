@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { db } from "@/db";
 import { supportPolicies } from "@/db/schema";
 import { lte, gte, and } from "drizzle-orm";
