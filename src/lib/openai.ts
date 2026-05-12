@@ -12,7 +12,9 @@ function client(): OpenAI {
  * 음성 → 한국어 텍스트 (Whisper)
  */
 export async function transcribeAudio(audio: File | Blob): Promise<string> {
-  const file = audio instanceof File ? audio : new File([audio], "voice.webm");
+  const file = audio instanceof File
+    ? audio
+    : new File([audio], "voice.webm", { type: "audio/webm" });
   const result = await client().audio.transcriptions.create({
     file,
     model: "whisper-1",
