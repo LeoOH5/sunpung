@@ -24,6 +24,7 @@ export const postpartumCenters = pgTable("postpartum_centers", {
   amenities: text("amenities"),
   rating: real("rating"),
   reviewCount: integer("review_count").default(0),
+  mapUrl: text("map_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+import { Star } from "lucide-react";
 import { db } from "@/db";
 import { postpartumCenters } from "@/db/schema";
 import { eq, sql, and } from "drizzle-orm";
@@ -35,7 +36,6 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
     <div className="min-h-screen">
       <header className="px-5 pt-6 pb-4 bg-white border-b border-gray-100 sticky top-0 z-10">
         <h1 className="text-xl font-bold mb-1">산후조리원</h1>
-        <p className="text-xs text-gray-500">서울시 산후조리업 인허가 데이터 (OA-16482) 기반</p>
       </header>
 
       <section className="px-5 pt-4 space-y-3">
@@ -100,7 +100,7 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
                 </div>
                 {c.rating && (
                   <div className="text-right">
-                    <p className="text-sm font-bold">⭐ {c.rating.toFixed(1)}</p>
+                    <p className="text-sm font-bold flex items-center gap-1"><Star size={13} fill="#FBBF24" color="#FBBF24" /> {c.rating.toFixed(1)}</p>
                     <p className="text-xs text-gray-500">후기 {c.reviewCount}</p>
                   </div>
                 )}
@@ -119,7 +119,14 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
                     {(c.priceMin! / 10000).toLocaleString()}만 ~ {(c.priceMax! / 10000).toLocaleString()}만원
                   </p>
                 </div>
-                <button className="btn-primary text-sm py-2 px-4">예약 문의</button>
+                <a
+                  href={c.mapUrl ?? `tel:${c.phone}`}
+                  target={c.mapUrl ? "_blank" : undefined}
+                  rel={c.mapUrl ? "noopener noreferrer" : undefined}
+                  className="btn-primary text-sm py-2 px-4"
+                >
+                  자세히 보기
+                </a>
               </div>
             </div>
           );
