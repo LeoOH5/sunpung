@@ -37,11 +37,11 @@ export default async function SOSPage() {
       </header>
 
       <section className="px-5 pt-5">
-        <div className="rounded-2xl p-4 shadow-sm bg-red-600 text-white">
-          <p className="text-xs opacity-80 mb-1">24시간 365일 즉시 상담</p>
-          <h2 className="text-3xl font-extrabold">1366</h2>
-          <p className="text-sm opacity-90 mt-1">여성긴급전화 서울센터</p>
-          <a href="tel:1366" className="flex items-center justify-center gap-2 mt-4 bg-white text-red-600 font-bold py-3 rounded-lg">
+        <div className="rounded-2xl p-4 shadow-sm bg-red-50 border border-red-100">
+          <p className="text-xs text-red-400 mb-1">24시간 365일 즉시 상담</p>
+          <h2 className="text-3xl font-extrabold text-red-700">1366</h2>
+          <p className="text-sm text-red-500 mt-1">여성긴급전화 서울센터</p>
+          <a href="tel:1366" className="flex items-center justify-center gap-2 mt-4 bg-red-600 text-white font-bold py-3 rounded-lg">
             <Phone size={16} /> 1366 지금 전화
           </a>
         </div>
