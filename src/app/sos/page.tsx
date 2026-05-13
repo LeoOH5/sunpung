@@ -33,11 +33,11 @@ export default async function SOSPage() {
   return (
     <div className="min-h-screen">
       <header className="px-5 pt-6 pb-5 bg-gradient-to-br from-red-50 to-rose-50">
-        <h1 className="text-xl font-bold mb-1 text-gray-900">긴급 SOS</h1>
+        <h1 className="text-xl font-bold mb-1 text-red-700">긴급 SOS</h1>
       </header>
 
       <section className="px-5 pt-5">
-        <div className="card bg-red-600 text-white">
+        <div className="rounded-2xl p-4 shadow-sm bg-red-600 text-white">
           <p className="text-xs opacity-80 mb-1">24시간 365일 즉시 상담</p>
           <h2 className="text-3xl font-extrabold">1366</h2>
           <p className="text-sm opacity-90 mt-1">여성긴급전화 서울센터</p>
