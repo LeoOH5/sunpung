@@ -33,7 +33,7 @@ export default async function SOSPage() {
   return (
     <div className="min-h-screen">
       <header className="px-5 pt-6 pb-5 bg-gradient-to-br from-red-50 to-rose-50">
-        <h1 className="text-xl font-bold mb-1 text-red-700">긴급 SOS</h1>
+        <h1 className="text-xl font-bold mb-1 text-gray-900">긴급 SOS</h1>
       </header>
 
       <section className="px-5 pt-5">

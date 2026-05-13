@@ -18,7 +18,7 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
   const sort = params.sort || "rating";
   const budget = params.budget || "all";
 
-  const conditions = [eq(postpartumCenters.businessStatus, "영업")];
+  const conditions = [eq(postpartumCenters.businessStatus, "영업중")];
   if (district !== "전체") conditions.push(eq(postpartumCenters.district, district));
   if (budget === "low") conditions.push(sql`${postpartumCenters.priceMin} < 4000000`);
   if (budget === "mid") conditions.push(sql`${postpartumCenters.priceMin} BETWEEN 4000000 AND 6000000`);
@@ -115,10 +115,16 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
 
               <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
                 <div>
-                  <p className="text-xs text-gray-500">2주 기준</p>
-                  <p className="font-bold text-pink-600">
-                    {(c.priceMin! / 10000).toLocaleString()}만 ~ {(c.priceMax! / 10000).toLocaleString()}만원
-                  </p>
+                  {c.priceMin && c.priceMax ? (
+                    <>
+                      <p className="text-xs text-gray-500">2주 기준</p>
+                      <p className="font-bold text-pink-600">
+                        {(c.priceMin / 10000).toLocaleString()}만 ~ {(c.priceMax / 10000).toLocaleString()}만원
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-sm text-gray-500">가격 문의</p>
+                  )}
                 </div>
                 <a
                   href={c.mapUrl ?? `tel:${c.phone}`}
