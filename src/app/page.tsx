@@ -1,5 +1,6 @@
 export const dynamic = "force-dynamic";
 import Link from "next/link";
+import { BookOpen, Home as HomeIcon, Banknote, BookMarked, Siren, UserRound } from "lucide-react";
 import { db } from "@/db";
 import { postpartumCenters, supportPolicies, babyJournals } from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
@@ -35,10 +36,10 @@ export default async function Home() {
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm text-gray-600">안녕하세요</p>
-            <h1 className="text-xl font-bold">{DEMO_USER.nickname}님 👋</h1>
+            <h1 className="text-xl font-bold">{DEMO_USER.nickname}님</h1>
           </div>
-          <div className="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center text-lg">
-            🤰
+          <div className="w-10 h-10 rounded-full bg-pink-200 flex items-center justify-center">
+            <UserRound size={20} className="text-pink-600" />
           </div>
         </div>
 
@@ -71,7 +72,7 @@ export default async function Home() {
         <div className="grid grid-cols-2 gap-3">
           <Link href="/diary" className="card hover:shadow-md transition-shadow">
             <div className="flex items-start justify-between mb-2">
-              <div className="text-2xl">📒</div>
+              <BookOpen size={24} className="text-amber-500" />
               {(journalCount.c as number) > 0 && (
                 <span className="text-xs px-2 py-1 rounded-full bg-amber-100 text-amber-700">
                   {journalCount.c}건
@@ -85,7 +86,7 @@ export default async function Home() {
           </Link>
 
           <Link href="/postpartum" className="card hover:shadow-md transition-shadow">
-            <div className="text-2xl mb-2">🏠</div>
+            <HomeIcon size={24} className="text-blue-500 mb-2" />
             <p className="font-semibold">산후조리원</p>
             <p className="text-xs text-gray-500 mt-1">
               서울 {centerCount.c}곳 비교·예약
@@ -93,7 +94,7 @@ export default async function Home() {
           </Link>
 
           <Link href="/support" className="card hover:shadow-md transition-shadow">
-            <div className="text-2xl mb-2">💰</div>
+            <Banknote size={24} className="text-emerald-500 mb-2" />
             <p className="font-semibold">받을 수 있는 지원금</p>
             <p className="text-xs text-gray-500 mt-1">
               {policyCount.c}개 정책 자동 매칭
@@ -101,7 +102,7 @@ export default async function Home() {
           </Link>
 
           <Link href="/content" className="card hover:shadow-md transition-shadow">
-            <div className="text-2xl mb-2">📚</div>
+            <BookMarked size={24} className="text-pink-500 mb-2" />
             <p className="font-semibold">{week}주차 정보</p>
             <p className="text-xs text-gray-500 mt-1">맞춤 검진·교육 안내</p>
           </Link>
@@ -114,32 +115,8 @@ export default async function Home() {
             <p className="font-bold text-red-700">긴급 도움이 필요하신가요?</p>
             <p className="text-xs text-red-600 mt-1">1366 + 가까운 상담소 24/7</p>
           </div>
-          <div className="text-3xl">🆘</div>
+          <Siren size={32} className="text-red-500" />
         </Link>
-      </section>
-
-      <section className="px-5 pt-5 pb-2">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">우리가 활용하는 공공데이터</h3>
-        <div className="card">
-          <div className="flex flex-wrap gap-2">
-            {[
-              "산후조리업 인허가 (OA-16482)",
-              "모자보건사업 통계",
-              "1366 운영실적",
-              "성·가정폭력 상담소",
-              "동별 출생 통계",
-              "임신주수별 출생",
-              "몽땅정보 (OA-22188)",
-            ].map((d) => (
-              <span key={d} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md">
-                {d}
-              </span>
-            ))}
-          </div>
-          <p className="text-xs text-gray-500 mt-3">
-            서울 열린데이터광장 7개 데이터셋 + AI(Whisper, GPT-4o, RAG)
-          </p>
-        </div>
       </section>
     </div>
   );

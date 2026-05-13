@@ -1,3 +1,5 @@
+import { Lightbulb, Stethoscope, Star, Check } from "lucide-react";
+
 const CAREGIVERS = [
   { id: 1, name: "김미경", years: 12, rating: 4.9, reviewCount: 187, district: "강남구", priceHour: 28000,
     specialty: ["신생아 케어", "모유수유 코칭", "산모 영양식"], certifications: ["산후관리사 자격증", "유아간호 1급"] },
@@ -31,7 +33,7 @@ export default function CaregiverPage() {
 
       <section className="px-5 pt-5">
         <div className="card bg-blue-50">
-          <p className="text-xs text-blue-700 font-bold mb-2">💡 정부 지원 가능</p>
+          <p className="text-xs text-blue-700 font-bold mb-2 flex items-center gap-1"><Lightbulb size={13} /> 정부 지원 가능</p>
           <p className="text-sm text-blue-900">
             기준중위소득 150% 이하면 <b>산모·신생아 건강관리 서비스 바우처</b>로 80~90% 지원받을 수 있어요.
           </p>
@@ -46,8 +48,8 @@ export default function CaregiverPage() {
             <div key={c.id} className="card">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-xl">
-                    👩‍⚕️
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <Stethoscope size={22} className="text-blue-500" />
                   </div>
                   <div>
                     <h4 className="font-bold">{c.name} 관리사</h4>
@@ -55,7 +57,7 @@ export default function CaregiverPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-bold">⭐ {c.rating}</p>
+                  <p className="text-sm font-bold flex items-center gap-1"><Star size={13} fill="#FBBF24" color="#FBBF24" /> {c.rating}</p>
                   <p className="text-xs text-gray-500">{c.reviewCount}건</p>
                 </div>
               </div>
@@ -68,7 +70,7 @@ export default function CaregiverPage() {
 
               <div className="flex flex-wrap gap-1 mb-3">
                 {c.certifications.map((cert) => (
-                  <span key={cert} className="text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded">✓ {cert}</span>
+                  <span key={cert} className="text-xs bg-gray-50 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1"><Check size={10} strokeWidth={3} />{cert}</span>
                 ))}
               </div>
 

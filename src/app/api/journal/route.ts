@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
 
   const [journals, [{ total }]] = await Promise.all([
     db.select().from(babyJournals)
-      .orderBy(desc(babyJournals.createdAt))
+      .orderBy(desc(babyJournals.date))
       .limit(limit)
       .offset(offset),
     db.select({ total: sql<number>`count(*)::int` }).from(babyJournals),
@@ -40,7 +40,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "제목, 내용, 날짜는 필수입니다" }, { status: 400 });
     }
 
-    const risk = await analyzeJournalRisk(content);
+    type RiskResult = Awaited<ReturnType<typeof analyzeJournalRisk>>;
+    let risk: RiskResult = { riskLevel: "정상", alertType: null, triggers: [] };
+    try {
+      risk = await analyzeJournalRisk(content);
+    } catch {
+      // AI 분석 실패 시 저장은 정상 진행
+    }
 
     const [inserted] = await db.insert(babyJournals).values({
       userId: 1,

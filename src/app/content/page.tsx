@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+import { Pin, Check } from "lucide-react";
 import { db } from "@/db";
 import { maternalHealthPrograms, pregnancyDurationStats } from "@/db/schema";
 import { and, eq, lte, gte, sql } from "drizzle-orm";
@@ -45,12 +46,11 @@ export default async function ContentPage() {
     <div className="min-h-screen">
       <header className="px-5 pt-6 pb-4 bg-gradient-to-br from-pink-50 to-rose-50">
         <h1 className="text-xl font-bold mb-1">{week}주차 맞춤 정보</h1>
-        <p className="text-xs text-gray-600">서울시 모자보건사업 통계 + 임신주수별 출생 통계 기반</p>
       </header>
 
       <section className="px-5 pt-4">
         <div className="card bg-gradient-to-br from-amber-50 to-pink-50">
-          <p className="text-xs text-amber-600 font-bold mb-1">📌 {tipKey}주차 가이드</p>
+          <p className="text-xs text-amber-600 font-bold mb-1 flex items-center gap-1"><Pin size={12} /> {tipKey}주차 가이드</p>
           <h2 className="text-lg font-bold mb-3">{tip.title}</h2>
           <ul className="space-y-2">
             {tip.tips.map((t) => (
@@ -84,9 +84,6 @@ export default async function ContentPage() {
               </div>
             );
           })}
-          <p className="text-xs text-gray-500 mt-3">
-            ※ 2025 서울시 임신기간별 출생 통계 (dataList/10872) 기반
-          </p>
         </div>
       </section>
 
@@ -110,8 +107,8 @@ export default async function ContentPage() {
                     </span>
                     <h4 className="font-semibold mt-1">{p.programName}</h4>
                     <p className="text-xs text-gray-600 mt-1">{p.description}</p>
-                    <p className="text-xs text-pink-600 mt-2">
-                      ✓ {p.weekRangeStart}~{p.weekRangeEnd}주차 (현재 {week}주차)
+                    <p className="text-xs text-pink-600 mt-2 flex items-center gap-1">
+                      <Check size={11} strokeWidth={2.5} /> {p.weekRangeStart}~{p.weekRangeEnd}주차 (현재 {week}주차)
                     </p>
                   </div>
                 </div>

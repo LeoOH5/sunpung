@@ -47,19 +47,46 @@ export function cosineSim(a: number[], b: number[]): number {
   return dot / (Math.sqrt(na) * Math.sqrt(nb));
 }
 
+const ABUSE_KEYWORDS = [
+  "때리고 싶", "때렸", "던지고 싶", "던졌", "해치고 싶", "죽이고 싶",
+  "학대", "폭력", "방치", "체벌", "아기가 싫", "아이가 싫", "아기 싫",
+  "아이 싫", "없애고 싶", "버리고 싶",
+];
+
+const DEPRESSION_KEYWORDS = [
+  "죽고 싶", "죽고싶", "사라지고 싶", "사라지고싶", "살기 싫", "살기싫",
+  "자해", "자살", "목숨", "스스로 해", "끝내고 싶", "포기하고 싶",
+  "절망", "희망이 없", "아무 의미", "사는 게 싫", "너무 힘들어",
+  "힘들어 죽겠", "미칠 것 같", "모든 게 싫", "아무것도 하기 싫",
+];
+
+function keywordDetect(content: string): {
+  riskLevel: "정상" | "우울의심" | "학대의심";
+  alertType: "1336" | "112" | null;
+  triggers: string[];
+} {
+  const abuseTriggers = ABUSE_KEYWORDS.filter((k) => content.includes(k));
+  if (abuseTriggers.length > 0) {
+    return { riskLevel: "학대의심", alertType: "112", triggers: abuseTriggers };
+  }
+  const depressionTriggers = DEPRESSION_KEYWORDS.filter((k) => content.includes(k));
+  if (depressionTriggers.length > 0) {
+    return { riskLevel: "우울의심", alertType: "1336", triggers: depressionTriggers };
+  }
+  return { riskLevel: "정상", alertType: null, triggers: [] };
+}
+
 /**
- * 아기수첩 내용 위험 감지 (우울/학대의심)
+ * 아기수첩 내용 위험 감지 — OpenAI 우선, 실패 시 키워드 폴백
  */
 export async function analyzeJournalRisk(content: string): Promise<{
   riskLevel: "정상" | "우울의심" | "학대의심";
   alertType: "1336" | "112" | null;
   triggers: string[];
 }> {
-  if (!process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY === "no-key") {
-    return { riskLevel: "정상", alertType: null, triggers: [] };
-  }
-
-  const prompt = `아래 육아일지 내용을 분석해 위험 신호를 감지하라.
+  if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== "no-key") {
+    try {
+      const prompt = `아래 육아일지 내용을 분석해 위험 신호를 감지하라.
 
 감지 기준:
 - "우울의심": 산모의 우울증, 자해·자살 충동, 극도의 절망감, "죽고싶다" 류 표현
@@ -74,19 +101,25 @@ alertType: 우울의심→"1336", 학대의심→"112", 정상→null
 [일지 내용]
 ${content}`;
 
-  const result = await client().chat.completions.create({
-    model: "gpt-4o-mini",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" },
-    temperature: 0.1,
-  });
+      const result = await client().chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" },
+        temperature: 0.1,
+      });
 
-  const parsed = JSON.parse(result.choices[0].message.content || "{}");
-  return {
-    riskLevel: parsed.riskLevel ?? "정상",
-    alertType: parsed.alertType === "null" ? null : (parsed.alertType ?? null),
-    triggers: parsed.triggers ?? [],
-  };
+      const parsed = JSON.parse(result.choices[0].message.content || "{}");
+      return {
+        riskLevel: parsed.riskLevel ?? "정상",
+        alertType: parsed.alertType === "null" ? null : (parsed.alertType ?? null),
+        triggers: parsed.triggers ?? [],
+      };
+    } catch {
+      // 크레딧 소진 등 API 오류 → 키워드 감지로 폴백
+    }
+  }
+
+  return keywordDetect(content);
 }
 
 /**

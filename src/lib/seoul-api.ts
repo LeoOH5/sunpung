@@ -59,7 +59,8 @@ export async function fetchAll<T = Record<string, unknown>>(
 // 서비스명 상수 (서울 열린데이터광장 OpenAPI)
 // ============================================================
 export const SeoulService = {
-  // Dataset 1: 산후조리업 인허가 (LOCALDATA 시스템 코드 103101)
+  // Dataset 1: 산후조리업 인허가 — LOCALDATA_103101은 골프연습장업 반환(잘못된 코드)
+  // 실제 서울시 산후조리원 데이터는 src/scripts/seed-postpartum.ts 로 직접 삽입
   POSTPARTUM_LICENSE: "LOCALDATA_103101",
   // Dataset 7: 몽땅정보 만능키 (OA-22188)
   MOMTANG_INFO: "tbBabyMallNew",

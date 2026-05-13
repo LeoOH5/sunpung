@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { BookOpen, Camera } from "lucide-react";
 
 type Journal = {
   id: number;
@@ -22,23 +23,30 @@ type RiskInfo = {
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onload = () => {
-        const MAX = 800;
-        const ratio = Math.min(MAX / img.width, MAX / img.height, 1);
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const drawAndExport = (maxPx: number, quality: number) => {
+        const ratio = Math.min(maxPx / img.width, maxPx / img.height, 1);
+        const w = Math.round(img.width * ratio);
+        const h = Math.round(img.height * ratio);
         const canvas = document.createElement("canvas");
-        canvas.width = img.width * ratio;
-        canvas.height = img.height * ratio;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.75));
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return "";
+        ctx.drawImage(img, 0, 0, w, h);
+        return canvas.toDataURL("image/jpeg", quality);
       };
-      img.onerror = reject;
-      img.src = e.target!.result as string;
+      // 1차: 1200px / 0.8 → 2차: 800px / 0.7 → 3차: 500px / 0.6
+      let result = drawAndExport(1200, 0.8);
+      if (result.length > 800_000) result = drawAndExport(800, 0.7);
+      if (result.length > 500_000) result = drawAndExport(500, 0.6);
+      resolve(result);
     };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
+    img.onerror = reject;
+    img.src = url;
   });
 }
 
@@ -84,7 +92,6 @@ export default function JournalPage() {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
     setSaving(true);
-    setNewRisk(null);
     try {
       const res = await fetch("/api/journal", {
         method: "POST",
@@ -93,10 +100,15 @@ export default function JournalPage() {
       });
       const data = await res.json();
       if (data.ok) {
-        setNewRisk(data.risk);
         await load(1);
         setPage(1);
-        if (!data.risk?.alertType) resetForm();
+        setTitle("");
+        setContent("");
+        setDate(new Date().toISOString().slice(0, 10));
+        setImageData(null);
+        setImagePreview(null);
+        setShowForm(false);
+        if (data.risk?.alertType) setNewRisk(data.risk);
       }
     } finally {
       setSaving(false);
@@ -109,7 +121,6 @@ export default function JournalPage() {
     setDate(new Date().toISOString().slice(0, 10));
     setImageData(null);
     setImagePreview(null);
-    setNewRisk(null);
     setShowForm(false);
   }
 
@@ -131,7 +142,7 @@ export default function JournalPage() {
       {/* Header */}
       <header className="sticky top-0 z-20 bg-amber-50 border-b border-amber-100 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-2xl">📒</span>
+          <BookOpen size={22} className="text-amber-600" />
           <h1 className="text-lg font-bold text-amber-900">아기수첩</h1>
         </div>
         <button
@@ -153,7 +164,7 @@ export default function JournalPage() {
           </div>
         ) : journals.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-5xl mb-4">📖</div>
+            <div className="flex justify-center mb-4"><BookOpen size={48} strokeWidth={1.5} className="text-amber-300" /></div>
             <p className="text-amber-700 font-medium">아직 기록이 없어요</p>
             <p className="text-sm text-amber-500 mt-1">소중한 순간을 기록해보세요</p>
           </div>
@@ -166,7 +177,7 @@ export default function JournalPage() {
                 className="w-full text-left bg-white rounded-2xl shadow-sm overflow-hidden active:scale-[0.99] transition-all border border-amber-100"
               >
                 {j.imageData && (
-                  <img src={j.imageData} alt="" className="w-full h-44 object-cover" />
+                  <img src={j.imageData} alt="" className="w-full max-h-64 object-contain bg-gray-50" />
                 )}
                 <div className="p-4">
                   <div className="flex items-start justify-between gap-2 mb-1">
@@ -175,7 +186,7 @@ export default function JournalPage() {
                       <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-full ${
                         j.alertType === "112" ? "bg-red-100 text-red-600" : "bg-orange-100 text-orange-600"
                       }`}>
-                        {j.alertType === "112" ? "⚠️ 학대의심" : "💛 우울의심"}
+                        {j.alertType === "112" ? "학대의심" : "우울의심"}
                       </span>
                     )}
                   </div>
@@ -213,6 +224,31 @@ export default function JournalPage() {
         )}
       </div>
 
+      {/* Risk Alert Modal */}
+      {newRisk?.alertType && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-sm px-4 pb-8">
+          <div className={`w-full max-w-sm rounded-3xl p-6 shadow-2xl ${
+            newRisk.alertType === "112" ? "bg-red-50 border border-red-200" : "bg-orange-50 border border-orange-200"
+          }`}>
+            <p className={`text-base font-bold mb-1 ${newRisk.alertType === "112" ? "text-red-700" : "text-orange-700"}`}>
+              {newRisk.alertType === "112" ? "아동학대 의심 내용 감지" : "우울증 증세 의심 내용 감지"}
+            </p>
+            <p className={`text-sm mb-4 ${newRisk.alertType === "112" ? "text-red-500" : "text-orange-500"}`}>
+              {newRisk.alertType === "112"
+                ? "아이의 안전을 위해 즉시 신고해주세요"
+                : "전문가와 상담하면 큰 도움이 됩니다"}
+            </p>
+            <AlertButtons alertType={newRisk.alertType} />
+            <button
+              onClick={() => setNewRisk(null)}
+              className="mt-4 w-full text-center text-sm text-gray-400 py-2"
+            >
+              닫기
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Detail Modal */}
       {selectedJournal && (
         <div className="fixed inset-0 z-40 flex flex-col bg-white overflow-y-auto">
@@ -230,7 +266,7 @@ export default function JournalPage() {
             </button>
           </div>
           {selectedJournal.imageData && (
-            <img src={selectedJournal.imageData} alt="" className="w-full max-h-72 object-cover" />
+            <img src={selectedJournal.imageData} alt="" className="w-full object-contain bg-black" style={{ maxHeight: "60vh" }} />
           )}
           <div className="px-5 py-4 flex-1">
             <p className="text-sm text-amber-500 mb-3">{formatDate(selectedJournal.date)}</p>
@@ -241,7 +277,7 @@ export default function JournalPage() {
               selectedJournal.alertType === "112" ? "bg-red-50 border border-red-200" : "bg-orange-50 border border-orange-200"
             }`}>
               <p className={`text-sm font-bold mb-3 ${selectedJournal.alertType === "112" ? "text-red-700" : "text-orange-700"}`}>
-                {selectedJournal.alertType === "112" ? "⚠️ 아동학대가 의심되는 내용이 감지되었습니다" : "💛 우울증 증세가 의심되는 내용이 감지되었습니다"}
+                {selectedJournal.alertType === "112" ? "아동학대가 의심되는 내용이 감지되었습니다" : "우울증 증세가 의심되는 내용이 감지되었습니다"}
               </p>
               <AlertButtons alertType={selectedJournal.alertType} />
             </div>
@@ -270,29 +306,17 @@ export default function JournalPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto pb-10">
-            {newRisk?.alertType && (
-              <div className={`mx-4 mt-4 rounded-2xl p-4 ${
-                newRisk.alertType === "112" ? "bg-red-50 border border-red-200" : "bg-orange-50 border border-orange-200"
-              }`}>
-                <p className={`text-sm font-bold mb-3 ${newRisk.alertType === "112" ? "text-red-700" : "text-orange-700"}`}>
-                  {newRisk.alertType === "112" ? "⚠️ 아동학대가 의심되는 내용이 감지되었습니다" : "💛 우울증 증세가 의심되는 내용이 감지되었습니다"}
-                </p>
-                <AlertButtons alertType={newRisk.alertType} />
-                <button onClick={resetForm} className="mt-3 w-full text-center text-sm text-gray-400 underline">닫기</button>
-              </div>
-            )}
-
             <form id="journal-form" onSubmit={handleSubmit} className="px-4 pt-4 space-y-4">
               <button
                 type="button"
                 onClick={() => fileRef.current?.click()}
-                className="w-full h-44 rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50 flex flex-col items-center justify-center gap-2 overflow-hidden active:opacity-80"
+                className={`w-full rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50 overflow-hidden active:opacity-80 ${imagePreview ? "" : "h-36 flex flex-col items-center justify-center gap-2"}`}
               >
                 {imagePreview ? (
-                  <img src={imagePreview} alt="" className="w-full h-full object-cover" />
+                  <img src={imagePreview} alt="" className="w-full object-contain max-h-80" />
                 ) : (
                   <>
-                    <span className="text-4xl">📷</span>
+                    <Camera size={36} className="text-amber-400" />
                     <span className="text-sm text-amber-500 font-medium">사진 추가 (선택)</span>
                   </>
                 )}
@@ -344,20 +368,20 @@ function AlertButtons({ alertType }: { alertType: string }) {
     <div className="flex flex-col gap-2">
       {alertType === "112" ? (
         <>
-          <a href="tel:112" className="flex items-center justify-center gap-2 bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
-            🚨 112 긴급신고
+          <a href="tel:112" className="flex items-center justify-center bg-red-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
+            112 긴급신고
           </a>
-          <a href="tel:1366" className="flex items-center justify-center gap-2 bg-white border border-red-200 text-red-600 font-semibold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
-            📞 1366 여성긴급전화
+          <a href="tel:1366" className="flex items-center justify-center bg-white border border-red-200 text-red-600 font-semibold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
+            1366 여성긴급전화
           </a>
         </>
       ) : (
         <>
-          <a href="tel:1336" className="flex items-center justify-center gap-2 bg-orange-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
-            📞 1336 정신건강위기상담
+          <a href="tel:1336" className="flex items-center justify-center bg-orange-500 text-white font-bold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
+            1336 정신건강위기상담
           </a>
-          <a href="tel:1393" className="flex items-center justify-center gap-2 bg-white border border-orange-200 text-orange-600 font-semibold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
-            💛 1393 자살예방상담전화
+          <a href="tel:1393" className="flex items-center justify-center bg-white border border-orange-200 text-orange-600 font-semibold py-3.5 rounded-xl text-sm active:scale-95 transition-all">
+            1393 자살예방상담전화
           </a>
         </>
       )}

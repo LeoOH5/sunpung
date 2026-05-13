@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+import { Phone, MapPin, Search } from "lucide-react";
 import { db } from "@/db";
 import { counselingCenters, womenEmergencyStats } from "@/db/schema";
 import { sql, desc } from "drizzle-orm";
@@ -33,7 +34,6 @@ export default async function SOSPage() {
     <div className="min-h-screen">
       <header className="px-5 pt-6 pb-5 bg-gradient-to-br from-red-50 to-rose-50">
         <h1 className="text-xl font-bold mb-1 text-red-700">긴급 SOS</h1>
-        <p className="text-xs text-gray-600">서울시 1366 운영실적 + 성·가정폭력 상담소 데이터 기반</p>
       </header>
 
       <section className="px-5 pt-5">
@@ -41,15 +41,15 @@ export default async function SOSPage() {
           <p className="text-xs opacity-80 mb-1">24시간 365일 즉시 상담</p>
           <h2 className="text-3xl font-extrabold">1366</h2>
           <p className="text-sm opacity-90 mt-1">여성긴급전화 서울센터</p>
-          <a href="tel:1366" className="block mt-4 bg-white text-red-600 text-center font-bold py-3 rounded-lg">
-            📞 1366 지금 전화
+          <a href="tel:1366" className="flex items-center justify-center gap-2 mt-4 bg-white text-red-600 font-bold py-3 rounded-lg">
+            <Phone size={16} /> 1366 지금 전화
           </a>
         </div>
       </section>
 
       <section className="px-5 pt-5">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          📍 가까운 상담소 (현재 {DEMO_USER.district} 기준)
+        <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+          <MapPin size={14} className="text-gray-500" /> 가까운 상담소 (현재 {DEMO_USER.district} 기준)
         </h3>
         <div className="space-y-3">
           {sorted.slice(0, 5).map((c) => (
@@ -72,8 +72,8 @@ export default async function SOSPage() {
                 </div>
               </div>
               <div className="flex gap-2 mt-3">
-                <a href={`tel:${c.phone}`} className="flex-1 bg-red-50 text-red-700 text-center text-sm py-2 rounded font-semibold">
-                  📞 {c.phone}
+                <a href={`tel:${c.phone}`} className="flex-1 flex items-center justify-center gap-1.5 bg-red-50 text-red-700 text-sm py-2 rounded font-semibold">
+                  <Phone size={14} /> {c.phone}
                 </a>
               </div>
             </div>
@@ -82,8 +82,8 @@ export default async function SOSPage() {
       </section>
 
       <section className="px-5 pt-5 pb-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-3">
-          🔍 서울시 1366 상담 유형 (최근 12개월)
+        <h3 className="text-sm font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+          <Search size={14} className="text-gray-500" /> 서울시 1366 상담 유형 (최근 12개월)
         </h3>
         <div className="card">
           {stats.map((s) => {
@@ -101,7 +101,6 @@ export default async function SOSPage() {
               </div>
             );
           })}
-          <p className="text-xs text-gray-500 mt-3">※ 서울시 여성긴급전화 1366 운영실적 (dataList/65)</p>
         </div>
       </section>
 

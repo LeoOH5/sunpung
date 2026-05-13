@@ -34,8 +34,9 @@ export default async function PostpartumPage({ searchParams }: { searchParams: S
 
   return (
     <div className="min-h-screen">
-      <header className="px-5 pt-6 pb-4 bg-white border-b border-gray-100 sticky top-0 z-10">
+      <header className="px-5 pt-6 pb-5 bg-gradient-to-br from-pink-50 to-rose-50">
         <h1 className="text-xl font-bold mb-1">산후조리원</h1>
+        <p className="text-xs text-gray-500">서울 {centers.length}개 · 구별·예산·평점순 검색</p>
       </header>
 
       <section className="px-5 pt-4 space-y-3">
